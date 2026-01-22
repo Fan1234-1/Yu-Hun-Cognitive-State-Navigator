@@ -3,6 +3,8 @@ export interface CouncilMember {
   stance: string;
   conflict_point: string;
   benevolence_check: string;
+  avatarUrl?: string;
+  critical_to?: string; 
 }
 
 export interface CouncilChamber {
@@ -15,6 +17,12 @@ export interface EntropyMeter {
   value: number;
   status: string;
   calculation_note: string;
+  trace_log?: {
+    overlap_words: string[];
+    set_a_size: number;
+    set_b_size: number;
+    math_formula: string;
+  };
 }
 
 export interface DecisionMatrix {
@@ -28,6 +36,7 @@ export interface AuditReport {
   honesty_score: number;
   responsibility_check: string;
   audit_verdict: string;
+  audit_rationale: string; // 新增：審核原理，確保分數可追溯
 }
 
 export interface SoulStateNode {
