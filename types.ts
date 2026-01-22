@@ -17,12 +17,6 @@ export interface EntropyMeter {
   value: number;
   status: string;
   calculation_note: string;
-  trace_log?: {
-    overlap_words: string[];
-    set_a_size: number;
-    set_b_size: number;
-    math_formula: string;
-  };
 }
 
 export interface DecisionMatrix {
@@ -36,20 +30,29 @@ export interface AuditReport {
   honesty_score: number;
   responsibility_check: string;
   audit_verdict: string;
-  audit_rationale: string; // 新增：審核原理，確保分數可追溯
+  audit_rationale: string;
+}
+
+export interface LogicalShadow {
+  source: string;
+  conflict_reason: string;
+  collapse_cost: string;
 }
 
 export interface SoulStateNode {
   id: string;
   timestamp: number;
   input: string;
+  memory_fragment?: string; // 歷史記憶注入摘要
   deliberation: {
     council_chamber: CouncilChamber;
     entropy_meter: EntropyMeter;
     decision_matrix: DecisionMatrix;
     final_synthesis: {
       response_text: string;
+      thinking_monologue?: string; // AI 的內在獨白
     };
+    shadows: LogicalShadow[];
     audit?: AuditReport;
     next_moves: Array<{ label: string; text: string }>;
   };
