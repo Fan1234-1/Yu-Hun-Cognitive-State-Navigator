@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { CouncilMember } from '../types';
-import { LucideIcon, AlertCircle, Heart, User, Info, MessageCircle } from 'lucide-react';
+import { LucideIcon, AlertCircle, Heart } from 'lucide-react';
 
 interface CouncilRowProps {
   role: string;
@@ -15,46 +15,46 @@ interface CouncilRowProps {
 const CouncilRow: React.FC<CouncilRowProps> = ({ role, roleZh, data, icon: Icon, colorClass, bgClass }) => {
   if (!data) return null;
   
-  const textColor = colorClass?.replace('border', 'text') ?? 'text-slate-400';
-  const iconColor = colorClass?.replace('border', 'text') ?? 'text-slate-500';
+  const textColor = colorClass.replace('border', 'text').replace('200', '700');
+  const iconColor = colorClass.replace('border', 'text').replace('200', '400');
 
   return (
-    <div className={`w-full p-5 rounded-[2rem] border-l-4 border ${colorClass} ${bgClass} transition-all duration-300 mb-4 shadow-lg backdrop-blur-md relative group/card`}>
-      <div className="flex flex-col sm:flex-row gap-5">
-        <div className="flex sm:flex-col items-center gap-2 sm:w-28 shrink-0 border-b sm:border-b-0 sm:border-r border-white/5 pb-4 sm:pb-0 sm:pr-4">
-          <div className="relative">
-            {data.avatarUrl ? (
-              <img src={data.avatarUrl} alt={role} className="w-14 h-14 rounded-xl border border-white/10 object-cover" />
-            ) : (
-              <div className="w-14 h-14 rounded-xl bg-slate-800 border border-white/5 flex items-center justify-center">
-                <User className="w-6 h-6 text-slate-600" />
-              </div>
-            )}
-            <div className={`absolute -bottom-1 -right-1 p-1 rounded-md bg-slate-950 border border-white/10 ${iconColor}`}>
-               <Icon className="w-3 h-3" />
-            </div>
+    <div className={`w-full p-4 rounded-xl border-l-4 border ${colorClass} ${bgClass} transition-all hover:translate-x-1 duration-300 mb-3`}>
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex sm:flex-col items-center sm:items-start gap-1 sm:w-32 shrink-0 border-b sm:border-b-0 sm:border-r border-slate-200/50 pb-2 sm:pb-0 sm:pr-4">
+          <div className={`p-2 rounded-lg bg-white/20 shadow-sm ${iconColor}`}>
+             <Icon className="w-5 h-5" />
           </div>
-          <div className="text-center">
-            <span className={`text-[10px] font-black uppercase tracking-tighter ${textColor} block`}>{role}</span>
-            <span className="text-[9px] font-bold text-slate-500 block">{roleZh}</span>
+          <div className="flex flex-col">
+            <span className={`text-[10px] font-bold uppercase tracking-widest ${textColor}`}>{role}</span>
+            <span className={`text-[9px] font-bold text-slate-500`}>{roleZh}</span>
           </div>
         </div>
 
         <div className="flex-1 space-y-3">
-          <p className="text-sm font-serif text-slate-200 leading-relaxed italic">
-            {data.stance || "Analyzing... / 正在分析數據..."}
+          <p className="text-sm font-medium text-slate-100 leading-relaxed font-serif">
+            {data.stance || "Analyzing... / 審議中..."}
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="bg-black/20 p-2.5 rounded-xl border border-white/5">
-              <span className="text-[8px] font-black text-amber-500/60 uppercase tracking-widest block mb-1">Logic Friction / 邏輯摩擦</span>
-              <p className="text-[10px] text-slate-500 truncate">{data.conflict_point || "None / 無明顯衝突"}</p>
-            </div>
-
-            <div className="bg-black/20 p-2.5 rounded-xl border border-white/5">
-              <span className="text-[8px] font-black text-emerald-400/60 uppercase tracking-widest block mb-1">Benevolence / 善意審核</span>
-              <p className="text-[10px] text-slate-500 truncate">{data.benevolence_check || "Verified / 驗證通過"}</p>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {data.conflict_point && (
+              <div className="flex items-start gap-2 bg-black/10 p-2 rounded-lg border border-white/5">
+                <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0 text-amber-500" />
+                <div>
+                  <span className="text-[10px] font-bold text-amber-500/80 uppercase block">Friction / 衝突點</span>
+                  <span className="text-[11px] text-slate-400">{data.conflict_point}</span>
+                </div>
+              </div>
+            )}
+            {data.benevolence_check && (
+              <div className="flex items-start gap-2 bg-black/10 p-2 rounded-lg border border-white/5">
+                <Heart className="w-3.5 h-3.5 mt-0.5 shrink-0 text-emerald-400" />
+                <div>
+                  <span className="text-[10px] font-bold text-emerald-400/80 uppercase block">Benevolence / 仁慈檢查</span>
+                  <span className="text-[11px] text-slate-400">{data.benevolence_check}</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

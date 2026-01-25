@@ -3,8 +3,6 @@ export interface CouncilMember {
   stance: string;
   conflict_point: string;
   benevolence_check: string;
-  avatarUrl?: string;
-  critical_to?: string; 
 }
 
 export interface CouncilChamber {
@@ -30,29 +28,19 @@ export interface AuditReport {
   honesty_score: number;
   responsibility_check: string;
   audit_verdict: string;
-  audit_rationale: string;
-}
-
-export interface LogicalShadow {
-  source: string;
-  conflict_reason: string;
-  collapse_cost: string;
 }
 
 export interface SoulStateNode {
   id: string;
   timestamp: number;
   input: string;
-  memory_fragment?: string; // 歷史記憶注入摘要
   deliberation: {
     council_chamber: CouncilChamber;
     entropy_meter: EntropyMeter;
     decision_matrix: DecisionMatrix;
     final_synthesis: {
       response_text: string;
-      thinking_monologue?: string; // AI 的內在獨白
     };
-    shadows: LogicalShadow[];
     audit?: AuditReport;
     next_moves: Array<{ label: string; text: string }>;
   };
