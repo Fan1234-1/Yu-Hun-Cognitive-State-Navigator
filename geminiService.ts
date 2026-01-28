@@ -15,17 +15,22 @@ E = w1 * |Philosopher - Engineer| + w2 * Guardian_Risk
 - 0.3 - 0.7: Healthy Friction / 良性摩擦 (Optimal zone for innovation)
 - > 0.7: Chaos / 系統混沌 (Logic break, requires ethical intervention)
 
+【MANDATORY JSON STRUCTURE】:
+You MUST return a valid JSON object. Do not stall. If an analysis is difficult, provide the best estimation rather than an empty response.
+Ensure "council_chamber" and all sub-fields are populated.
+
 Always respond in valid JSON format.`;
 
 export async function deliberate(inputText: string, history: any[]) {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
   
-  const response = await ai.models.generateContent({
-    model: "gemini-3-pro-preview",
-    contents: [
-      {
-        role: "user",
-        parts: [{ text: `
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-pro-preview",
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: `
 History Context / 歷史脈絡：${JSON.stringify(history)}
 Current Input / 當前輸入：${inputText}
 
@@ -62,20 +67,21 @@ Perform internal deliberation and output JSON. Remember the bilingual mandate:
   ]
 }
 ` }]
+        }
+      ],
+      config: {
+        systemInstruction: SYSTEM_INSTRUCTION,
+        responseMimeType: "application/json",
+        temperature: 0.8,
+        thinkingConfig: { thinkingBudget: 32768 }
       }
-    ],
-    config: {
-      systemInstruction: SYSTEM_INSTRUCTION,
-      responseMimeType: "application/json",
-      temperature: 0.8,
-      thinkingConfig: { thinkingBudget: 32768 }
-    }
-  });
+    });
 
-  try {
-    return JSON.parse(response.text || "{}");
+    const text = response.text;
+    if (!text) throw new Error("Empty response from AI");
+    return JSON.parse(text);
   } catch (e) {
-    console.error("JSON parsing error:", e);
+    console.error("Deliberation Error:", e);
     return null;
   }
 }
@@ -84,31 +90,32 @@ export async function generateInsight(history: SoulStateNode[]): Promise<Insight
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
   const historySnippet = history.map(n => ({ input: n.input, ai: n.deliberation.final_synthesis.response_text }));
   
-  const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: [
-      {
-        role: "user",
-        parts: [{ text: `Analyze this conversation trajectory. Follow the bilingual mandate:
-        ${JSON.stringify(historySnippet)}
-        
-        {
-          "emotional_arc": "[中] / [En]",
-          "key_insights": ["[中] / [En]", "[中] / [En]"],
-          "hidden_needs": "[中] / [En]",
-          "navigator_rating": { "connection_score": 8, "growth_score": 7 },
-          "closing_advice": "[中] / [En]"
-        }` }]
-      }
-    ],
-    config: {
-      responseMimeType: "application/json"
-    }
-  });
-
   try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: `Analyze this conversation trajectory. Follow the bilingual mandate:
+          ${JSON.stringify(historySnippet)}
+          
+          {
+            "emotional_arc": "[中] / [En]",
+            "key_insights": ["[中] / [En]", "[中] / [En]"],
+            "hidden_needs": "[中] / [En]",
+            "navigator_rating": { "connection_score": 8, "growth_score": 7 },
+            "closing_advice": "[中] / [En]"
+          }` }]
+        }
+      ],
+      config: {
+        responseMimeType: "application/json"
+      }
+    });
+
     return JSON.parse(response.text || "{}");
   } catch (e) {
+    console.error("Insight Error:", e);
     return null;
   }
 }

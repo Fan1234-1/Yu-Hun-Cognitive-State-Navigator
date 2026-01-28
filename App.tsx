@@ -69,16 +69,25 @@ const App: React.FC = () => {
 
       const result = await deliberate(textToSend, historyContext);
       
-      if (result) {
-        const newNode: SoulStateNode = {
-          id: `node_${Date.now()}`,
-          timestamp: Date.now(),
-          input: textToSend,
-          deliberation: result
-        };
-        setHistory(prev => [...prev, newNode]);
-        setSelectedNodeId(newNode.id);
-      }
+      const newNode: SoulStateNode = {
+        id: `node_${Date.now()}`,
+        timestamp: Date.now(),
+        input: textToSend,
+        deliberation: result || {
+          council_chamber: {
+            philosopher: { stance: "Cognitive Lock detected. / 偵測到認知鎖死。", conflict_point: "Logic loop / 邏輯迴圈", benevolence_check: "Uncertain / 不確定" },
+            engineer: { stance: "System timeout. / 系統超時。", conflict_point: "Resource exhausted / 資源耗盡", benevolence_check: "Maintenance required / 需維護" },
+            guardian: { stance: "Ethics safety trigger. / 倫理安全觸發。", conflict_point: "Unsafe output risk / 輸出風險", benevolence_check: "Protective shutdown / 保護性關閉" }
+          },
+          entropy_meter: { value: 0.99, status: "SYSTEM CHAOS / 系統混亂", calculation_note: "API Error or JSON Malformed / 介面錯誤或格式異常" },
+          decision_matrix: { user_hidden_intent: "N/A", ai_strategy_name: "RECOVERY", intended_effect: "Restore", tone_tag: "EMERGENCY" },
+          final_synthesis: { response_text: "I apologize, the inner council has encountered a cognitive stall. Please rephrase or try again. / 抱歉，內在議會遭遇認知停滯。請嘗試重新描述或稍後再試。" },
+          next_moves: [{ label: "Retry / 重試", text: textToSend }]
+        }
+      };
+      
+      setHistory(prev => [...prev, newNode]);
+      setSelectedNodeId(newNode.id);
     } catch (err) {
       console.error(err);
     } finally {
@@ -154,7 +163,7 @@ const App: React.FC = () => {
               placeholder="Search Memory... / 搜尋內在記憶..."
               value={filters.search}
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-              className="w-full bg-slate-950/60 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-xs focus:ring-1 focus:ring-indigo-500/50 outline-none transition-all placeholder-slate-700 font-medium"
+              className="w-full bg-slate-950/60 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-xs focus:ring-1 focus:ring-indigo-500/50 outline-none transition-all placeholder-slate-700 font-medium text-white"
             />
           </div>
           
@@ -541,14 +550,14 @@ const App: React.FC = () => {
              </div>
              <div className="flex gap-6 group">
                 <div className="relative flex-1 flex items-center">
-                  <MessageSquare className="absolute left-10 w-8 h-8 text-slate-700 group-focus-within:text-indigo-500 transition-all duration-500" />
+                  <MessageSquare className="absolute left-10 w-8 h-8 text-slate-500 group-focus-within:text-indigo-500 transition-all duration-500" />
                   <input 
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="Inject Soul Command... / 注入靈魂指令..."
                     disabled={loading}
-                    className="w-full bg-slate-900 border border-slate-800/80 rounded-[3rem] pl-24 pr-12 py-9 focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-500/40 outline-none transition-all text-white placeholder-slate-800 shadow-3xl font-serif text-3xl focus:bg-slate-900/60"
+                    className="w-full bg-white border border-slate-200 rounded-[3rem] pl-24 pr-12 py-9 focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-500/40 outline-none transition-all text-black placeholder-slate-400 shadow-3xl font-serif text-3xl"
                   />
                 </div>
                 <button 
