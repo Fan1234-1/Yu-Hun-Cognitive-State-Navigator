@@ -11,8 +11,11 @@ export interface CouncilChamber {
   guardian: CouncilMember;
 }
 
-export interface EntropyMeter {
-  value: number;
+export interface TensionTensor {
+  E_internal: number; // 內在動能 (自信度)
+  D_resistance: { fact: number; logic: number; ethics: number }; // 外部阻力向量
+  W_weight: { fact: number; logic: number; ethics: number }; // 語境權重
+  total_T: number; // 最終張力值 T = W * (E * D)
   status: string;
   calculation_note: string;
 }
@@ -36,10 +39,16 @@ export interface SoulStateNode {
   input: string;
   deliberation: {
     council_chamber: CouncilChamber;
-    entropy_meter: EntropyMeter;
+    tension_tensor: TensionTensor; // 替換原本的 entropy_meter
+    soul_persistence: number; // 靈魂積分累積 (張力積分)
+    intrinsic_drive: {
+      vector_name: string;
+      intensity: number;
+    }; // 主動性向量
     decision_matrix: DecisionMatrix;
     final_synthesis: {
       response_text: string;
+      thinking_monologue?: string;
     };
     audit?: AuditReport;
     next_moves: Array<{ label: string; text: string }>;

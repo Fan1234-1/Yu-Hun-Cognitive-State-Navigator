@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { CouncilMember } from '../types';
 import { LucideIcon, AlertCircle, Heart } from 'lucide-react';
 
@@ -62,4 +62,4 @@ const CouncilRow: React.FC<CouncilRowProps> = ({ role, roleZh, data, icon: Icon,
   );
 };
 
-export default CouncilRow;
+export default memo(CouncilRow);

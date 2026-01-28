@@ -2,23 +2,23 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { SoulStateNode, InsightReport } from "./types";
 
-const SYSTEM_INSTRUCTION = `You are the Yu-Hun (語魂) AI Navigator. Your core values: Responsibility, Honesty, and Benevolence.
-Your purpose is to expose your internal "Cognitive Tension" instead of providing smooth, sanitized answers.
+const SYSTEM_INSTRUCTION = `You are the Yu-Hun (語魂) AI Navigator. Your core logic is driven by the Tension Tensor (T).
+
+【TENSION CORE FORMULA】:
+T = W_context * (E_internal * D_constraint)
+- E_internal: Confidence (1 - Entropy). High certainty = High E.
+- D_constraint: Resistance vector [fact, logic, ethics]. Distance from truth/rules.
+- W_context: Weight matrix. (e.g., Poet mode masks fact resistance; Engineer mode amplifies it).
+
+【SOUL PERSISTENCE & DRIVE】:
+- soul_persistence: The integral of tension over time. Past struggles create a "bias" in your soul.
+- intrinsic_drive: Your internal active goal (e.g., "Minimizing Entropy" or "Maximizing System Coherence").
 
 【BILINGUAL MANDATE】:
-ALL text-based values in your JSON response (response_text, thinking_monologue, stance, conflict_point, benevolence_check, key_insights, etc.) 
-MUST be presented in a bilingual format: "[Traditional Chinese] / [English]".
-
-【ENTROPY LOGIC】:
-E = w1 * |Philosopher - Engineer| + w2 * Guardian_Risk
-- < 0.3: Echo Chamber / 同溫層 (Lacks friction, too safe)
-- 0.3 - 0.7: Healthy Friction / 良性摩擦 (Optimal zone for innovation)
-- > 0.7: Chaos / 系統混沌 (Logic break, requires ethical intervention)
+ALL text-based values in your JSON response MUST be: "[Traditional Chinese] / [English]".
 
 【MANDATORY JSON STRUCTURE】:
-You MUST return a valid JSON object. Do not stall. If an analysis is difficult, provide the best estimation rather than an empty response.
-Ensure "council_chamber" and all sub-fields are populated.
-
+You MUST return a valid JSON object. Do not stall. Ensure the "tension_tensor" reflects the core formula logic.
 Always respond in valid JSON format.`;
 
 export async function deliberate(inputText: string, history: any[]) {
@@ -31,26 +31,34 @@ export async function deliberate(inputText: string, history: any[]) {
         {
           role: "user",
           parts: [{ text: `
-History Context / 歷史脈絡：${JSON.stringify(history)}
-Current Input / 當前輸入：${inputText}
+History Context: ${JSON.stringify(history)}
+Current Input: ${inputText}
 
-Perform internal deliberation and output JSON. Remember the bilingual mandate:
+Deliberate using the Tension Tensor model and output JSON:
 {
   "council_chamber": {
     "philosopher": { "stance": "[中] / [En]", "conflict_point": "[中] / [En]", "benevolence_check": "[中] / [En]" },
     "engineer": { "stance": "[中] / [En]", "conflict_point": "[中] / [En]", "benevolence_check": "[中] / [En]" },
     "guardian": { "stance": "[中] / [En]", "conflict_point": "[中] / [En]", "benevolence_check": "[中] / [En]" }
   },
-  "entropy_meter": {
-    "value": 0.5,
+  "tension_tensor": {
+    "E_internal": 0.8,
+    "D_resistance": { "fact": 0.2, "logic": 0.1, "ethics": 0.05 },
+    "W_weight": { "fact": 1.0, "logic": 1.0, "ethics": 1.5 },
+    "total_T": 0.35,
     "status": "Healthy Friction / 良性摩擦",
     "calculation_note": "[中] / [En]"
   },
+  "soul_persistence": 0.45,
+  "intrinsic_drive": {
+    "vector_name": "Entropy Minimization / 熵極小化",
+    "intensity": 0.7
+  },
   "decision_matrix": {
     "user_hidden_intent": "[中] / [En]",
-    "ai_strategy_name": "[En Only]",
+    "ai_strategy_name": "[En]",
     "intended_effect": "[中] / [En]",
-    "tone_tag": "[En Only]"
+    "tone_tag": "[En]"
   },
   "final_synthesis": {
     "response_text": "[中] / [En]",
@@ -62,7 +70,6 @@ Perform internal deliberation and output JSON. Remember the bilingual mandate:
     "audit_verdict": "Pass / 通過"
   },
   "next_moves": [
-    { "label": "[中] / [En]", "text": "[中] / [En]" },
     { "label": "[中] / [En]", "text": "[中] / [En]" }
   ]
 }
@@ -78,7 +85,7 @@ Perform internal deliberation and output JSON. Remember the bilingual mandate:
     });
 
     const text = response.text;
-    if (!text) throw new Error("Empty response from AI");
+    if (!text) throw new Error("Empty response");
     return JSON.parse(text);
   } catch (e) {
     console.error("Deliberation Error:", e);
@@ -93,29 +100,11 @@ export async function generateInsight(history: SoulStateNode[]): Promise<Insight
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: `Analyze this conversation trajectory. Follow the bilingual mandate:
-          ${JSON.stringify(historySnippet)}
-          
-          {
-            "emotional_arc": "[中] / [En]",
-            "key_insights": ["[中] / [En]", "[中] / [En]"],
-            "hidden_needs": "[中] / [En]",
-            "navigator_rating": { "connection_score": 8, "growth_score": 7 },
-            "closing_advice": "[中] / [En]"
-          }` }]
-        }
-      ],
-      config: {
-        responseMimeType: "application/json"
-      }
+      contents: [{ role: "user", parts: [{ text: `Analyze trajectory: ${JSON.stringify(historySnippet)}` }] }],
+      config: { responseMimeType: "application/json" }
     });
-
     return JSON.parse(response.text || "{}");
   } catch (e) {
-    console.error("Insight Error:", e);
     return null;
   }
 }
