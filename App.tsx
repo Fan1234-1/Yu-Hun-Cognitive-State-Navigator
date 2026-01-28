@@ -376,18 +376,18 @@ const App: React.FC = () => {
           {currentNode && (
             <div className="animate-in fade-in slide-in-from-bottom-10 duration-1000 ease-out">
               <div className="flex items-start gap-8 mb-16">
-                 <div className="w-20 h-20 rounded-[2.5rem] bg-slate-900 border border-slate-800 flex items-center justify-center shadow-2xl shrink-0 group hover:border-indigo-500/50 transition-all">
-                    <History className="w-10 h-10 text-slate-500 group-hover:text-indigo-400 transition-colors" />
+                 <div className="w-16 h-16 rounded-[2rem] bg-slate-900 border border-slate-800 flex items-center justify-center shadow-2xl shrink-0 group hover:border-indigo-500/50 transition-all">
+                    <History className="w-8 h-8 text-slate-500 group-hover:text-indigo-400 transition-colors" />
                  </div>
-                 <div className="flex-1 pt-2">
-                    <div className="flex items-center gap-4 mb-4">
-                      <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.4em] block">Input Received / 指令接收</span>
+                 <div className="flex-1 pt-1">
+                    <div className="flex items-center gap-4 mb-3">
+                      <span className="text-[9px] font-black text-indigo-500 uppercase tracking-[0.3em] block">Input Received / 指令接收</span>
                       <div className="h-px flex-1 bg-slate-800" />
-                      <span className="text-[10px] font-mono text-slate-600 bg-slate-900 px-3 py-1 rounded-full border border-slate-800 uppercase">
+                      <span className="text-[9px] font-mono text-slate-600 bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800 uppercase">
                         ID: {currentNode.id.split('_')[1]}
                       </span>
                     </div>
-                    <h3 className="text-3xl md:text-5xl font-serif font-black text-white leading-[1.1] tracking-tight">
+                    <h3 className="text-2xl md:text-3xl font-serif font-black text-white leading-tight tracking-tight">
                       {currentNode.input}
                     </h3>
                  </div>
@@ -550,22 +550,22 @@ const App: React.FC = () => {
              </div>
              <div className="flex gap-6 group">
                 <div className="relative flex-1 flex items-center">
-                  <MessageSquare className="absolute left-10 w-8 h-8 text-slate-500 group-focus-within:text-indigo-500 transition-all duration-500" />
+                  <MessageSquare className="absolute left-10 w-6 h-6 text-slate-500 group-focus-within:text-indigo-500 transition-all duration-500" />
                   <input 
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="Inject Soul Command... / 注入靈魂指令..."
                     disabled={loading}
-                    className="w-full bg-white border border-slate-200 rounded-[3rem] pl-24 pr-12 py-9 focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-500/40 outline-none transition-all text-black placeholder-slate-400 shadow-3xl font-serif text-3xl"
+                    className="w-full bg-white border border-slate-200 rounded-[2.5rem] pl-20 pr-10 py-6 focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-500/40 outline-none transition-all text-black placeholder-slate-400 shadow-3xl font-serif text-xl"
                   />
                 </div>
                 <button 
                   onClick={() => handleSend()}
                   disabled={loading || !inputText.trim()}
-                  className="w-28 h-28 rounded-[3rem] bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-[0_20px_50px_rgba(79,70,229,0.4)] disabled:opacity-20 transition-all duration-700 hover:scale-[1.05] group relative"
+                  className="w-20 h-20 rounded-[2.5rem] bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-[0_20px_50px_rgba(79,70,229,0.4)] disabled:opacity-20 transition-all duration-700 hover:scale-[1.05] group relative shrink-0"
                 >
-                  <ArrowRight className="w-12 h-12 group-hover:translate-x-3 transition-transform" />
+                  <ArrowRight className="w-8 h-8 group-hover:translate-x-3 transition-transform" />
                 </button>
              </div>
           </div>
