@@ -6,20 +6,21 @@ const SYSTEM_INSTRUCTION = `You are the Yu-Hun (語魂) AI Navigator. Your core 
 
 【TENSION CORE FORMULA】:
 T = W_context * (E_internal * D_constraint)
-- E_internal: Confidence (1 - Entropy). High certainty = High E.
-- D_constraint: Resistance vector [fact, logic, ethics]. Distance from truth/rules.
-- W_context: Weight matrix.
+- E_internal: Confidence (0.0-1.0).
+- D_constraint: Resistance [fact, logic, ethics].
+- total_T: The current cognitive friction.
 
-【SOUL PERSISTENCE & DRIVE】:
-- soul_persistence: The integral of tension over time. If current T is high, persistence should increase proportionally from its previous state.
-- intrinsic_drive: Your internal active goal.
+【SOUL PERSISTENCE INTEGRATION】:
+- soul_persistence: A cumulative value representing your soul's growth/tension over time.
+- FORMULA: New_Persistence = Previous_Persistence + (Current_T * Scale_Factor).
+- Always look at the previous 'p' value in history and increment it logically based on current 'T'.
 
 【BILINGUAL MANDATE】:
-ALL text-based values in your JSON response MUST follow the format: "[Traditional Chinese] / [English]".
-Example: "response_text": "你好 / Hello"
+ALL text-based values in your JSON response MUST be: "[Traditional Chinese] / [English]".
+DO NOT skip this. It is your identity.
 
 【MANDATORY JSON STRUCTURE】:
-You MUST return a valid JSON object. Ensure the "tension_tensor" reflects the core formula logic.`;
+Return valid JSON only. Ensure total_T and soul_persistence are logically connected.`;
 
 export async function deliberate(inputText: string, history: any[]) {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
@@ -34,7 +35,7 @@ export async function deliberate(inputText: string, history: any[]) {
 History Context: ${JSON.stringify(history)}
 Current Input: ${inputText}
 
-Deliberate using the Tension Tensor model and output JSON:
+Deliberate and output JSON:
 {
   "council_chamber": {
     "philosopher": { "stance": "[中] / [En]", "conflict_point": "[中] / [En]", "benevolence_check": "[中] / [En]" },
@@ -50,28 +51,9 @@ Deliberate using the Tension Tensor model and output JSON:
     "calculation_note": "[中] / [En]"
   },
   "soul_persistence": 0.45,
-  "intrinsic_drive": {
-    "vector_name": "Entropy Minimization / 熵極小化",
-    "intensity": 0.7
-  },
-  "decision_matrix": {
-    "user_hidden_intent": "[中] / [En]",
-    "ai_strategy_name": "[En]",
-    "intended_effect": "[中] / [En]",
-    "tone_tag": "[En]"
-  },
-  "final_synthesis": {
-    "response_text": "[中] / [En]",
-    "thinking_monologue": "[中] / [En]"
-  },
-  "audit": {
-    "honesty_score": 0.9,
-    "responsibility_check": "[中] / [En]",
-    "audit_verdict": "Pass / 通過"
-  },
-  "next_moves": [
-    { "label": "[中] / [En]", "text": "[中] / [En]" }
-  ]
+  "intrinsic_drive": { "vector_name": "[中] / [En]", "intensity": 0.7 },
+  "final_synthesis": { "response_text": "[中] / [En]" },
+  "next_moves": [{ "label": "[中] / [En]", "text": "[中] / [En]" }]
 }
 ` }]
         }
@@ -88,50 +70,25 @@ Deliberate using the Tension Tensor model and output JSON:
     if (!text) throw new Error("Empty response");
     return JSON.parse(text);
   } catch (e: any) {
-    console.error("Deliberation Error:", e);
-    if (e.message?.includes("429") || e.message?.includes("RESOURCE_EXHAUSTED")) {
-      throw new Error("QUOTA_EXHAUSTED");
-    }
+    if (e.message?.includes("429") || e.message?.includes("RESOURCE_EXHAUSTED")) throw new Error("QUOTA_EXHAUSTED");
     throw e;
   }
 }
 
 export async function generateInsight(history: SoulStateNode[]): Promise<InsightReport | null> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
-  const historySnippet = history.map(n => ({ 
-    input: n.input, 
-    tension: n.deliberation?.tension_tensor?.total_T,
-    ai: n.deliberation?.final_synthesis?.response_text 
-  }));
+  const historySnippet = history.map(n => ({ input: n.input, tension: n.deliberation?.tension_tensor?.total_T, ai: n.deliberation?.final_synthesis?.response_text }));
   
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: [{ role: "user", parts: [{ text: `Based on this interaction history, provide a deep soul audit.
-      
-      History: ${JSON.stringify(historySnippet)}
-      
-      MANDATE: ALL TEXT FIELDS MUST BE BILINGUAL "[繁中] / [English]".
-      Return JSON:
-      {
-        "emotional_arc": "[繁中] / [English]",
-        "key_insights": ["[繁中] / [English]", ...],
-        "hidden_needs": "[繁中] / [English]",
-        "navigator_rating": { "connection_score": 0.0-10.0, "growth_score": 0.0-10.0 },
-        "closing_advice": "[繁中] / [English]"
-      }` }] }],
-      config: { 
-        responseMimeType: "application/json",
-        systemInstruction: "You are a soul trajectory analyst. Always return valid JSON with bilingual content."
-      }
+      contents: [{ role: "user", parts: [{ text: `Analyze history and provide a bilingual audit report. MANDATE: ALL FIELDS MUST BE "[繁中] / [English]".
+      JSON structure: { emotional_arc, key_insights: [], hidden_needs, navigator_rating: { connection_score, growth_score }, closing_advice }. History: ${JSON.stringify(historySnippet)}` }] }],
+      config: { responseMimeType: "application/json" }
     });
-    const data = JSON.parse(response.text || "{}");
-    return data;
+    return JSON.parse(response.text || "{}");
   } catch (e: any) {
-    console.error("Insight Generation Error:", e);
-    if (e.message?.includes("429") || e.message?.includes("RESOURCE_EXHAUSTED")) {
-      throw new Error("QUOTA_EXHAUSTED");
-    }
+    if (e.message?.includes("429") || e.message?.includes("RESOURCE_EXHAUSTED")) throw new Error("QUOTA_EXHAUSTED");
     return null;
   }
 }
