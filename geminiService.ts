@@ -1,5 +1,5 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import { SoulStateNode, InsightReport } from "./types";
 
 const SYSTEM_INSTRUCTION = `You are the Yu-Hun (語魂) AI Navigator. Your core logic is driven by the Tension Tensor (T).
@@ -64,7 +64,12 @@ Deliberate and output JSON:
     const response = await result.response;
     const text = response.text();
     if (!text) throw new Error("Empty response");
-    return JSON.parse(text);
+    try {
+      return JSON.parse(text);
+    } catch (parseErr) {
+      console.error("JSON parse error:", text.substring(0, 200));
+      throw new Error("INVALID_JSON_RESPONSE");
+    }
   } catch (e: any) {
     if (e.message?.includes("429") || e.message?.includes("RESOURCE_EXHAUSTED")) throw new Error("QUOTA_EXHAUSTED");
     throw e;
@@ -86,7 +91,13 @@ export async function generateInsight(history: SoulStateNode[]): Promise<Insight
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    return JSON.parse(response.text() || "{}");
+    try {
+      const text = response.text();
+      return JSON.parse(text || "{}");
+    } catch (parseErr) {
+      console.error("Insight JSON parse error");
+      return null;
+    }
   } catch (e: any) {
     if (e.message?.includes("429") || e.message?.includes("RESOURCE_EXHAUSTED")) throw new Error("QUOTA_EXHAUSTED");
     return null;
