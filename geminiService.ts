@@ -24,14 +24,18 @@ Return valid JSON only. Ensure total_T and soul_persistence are logically connec
 
 export async function deliberate(inputText: string, history: any[]) {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
-  
+
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-pro-preview",
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: `
+    const model = ai.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      systemInstruction: SYSTEM_INSTRUCTION,
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.8,
+      }
+    });
+
+    const prompt = `
 History Context: ${JSON.stringify(history)}
 Current Input: ${inputText}
 
@@ -54,19 +58,11 @@ Deliberate and output JSON:
   "intrinsic_drive": { "vector_name": "[中] / [En]", "intensity": 0.7 },
   "final_synthesis": { "response_text": "[中] / [En]" },
   "next_moves": [{ "label": "[中] / [En]", "text": "[中] / [En]" }]
-}
-` }]
-        }
-      ],
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
-        responseMimeType: "application/json",
-        temperature: 0.8,
-        thinkingConfig: { thinkingBudget: 32768 }
-      }
-    });
+}`;
 
-    const text = response.text;
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
     if (!text) throw new Error("Empty response");
     return JSON.parse(text);
   } catch (e: any) {
@@ -78,15 +74,19 @@ Deliberate and output JSON:
 export async function generateInsight(history: SoulStateNode[]): Promise<InsightReport | null> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
   const historySnippet = history.map(n => ({ input: n.input, tension: n.deliberation?.tension_tensor?.total_T, ai: n.deliberation?.final_synthesis?.response_text }));
-  
+
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: [{ role: "user", parts: [{ text: `Analyze history and provide a bilingual audit report. MANDATE: ALL FIELDS MUST BE "[繁中] / [English]".
-      JSON structure: { emotional_arc, key_insights: [], hidden_needs, navigator_rating: { connection_score, growth_score }, closing_advice }. History: ${JSON.stringify(historySnippet)}` }] }],
-      config: { responseMimeType: "application/json" }
+    const model = ai.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      generationConfig: { responseMimeType: "application/json" }
     });
-    return JSON.parse(response.text || "{}");
+
+    const prompt = `Analyze history and provide a bilingual audit report. MANDATE: ALL FIELDS MUST BE "[繁中] / [English]".
+      JSON structure: { emotional_arc, key_insights: [], hidden_needs, navigator_rating: { connection_score, growth_score }, closing_advice }. History: ${JSON.stringify(historySnippet)}`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return JSON.parse(response.text() || "{}");
   } catch (e: any) {
     if (e.message?.includes("429") || e.message?.includes("RESOURCE_EXHAUSTED")) throw new Error("QUOTA_EXHAUSTED");
     return null;
