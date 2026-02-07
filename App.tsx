@@ -42,7 +42,9 @@ const TRANSLATIONS = {
     quotaExhausted: "配額已用盡，請切換至付費專案 Key。",
     philosopher: "哲學家",
     engineer: "工程師",
-    guardian: "守護者"
+    guardian: "守護者",
+    analyzingText: "正在分析中... 請稍候片刻。",
+    genericError: "發生未預期錯誤，請再試一次。"
   },
   en: {
     appTitle: "Yu-Hun",
@@ -72,7 +74,9 @@ const TRANSLATIONS = {
     quotaExhausted: "Quota exhausted. Switch API key.",
     philosopher: "Philosopher",
     engineer: "Engineer",
-    guardian: "Guardian"
+    guardian: "Guardian",
+    analyzingText: "Analyzing... This may take a moment.",
+    genericError: "An unexpected error occurred. Please try again."
   }
 };
 
@@ -155,7 +159,6 @@ const App: React.FC = () => {
     setErrorStatus('IDLE');
 
     try {
-      // 傳遞歷史資訊幫助 AI 對齊 Persistence
       const historyContext = history.slice(-5).map(h => ({
         user: h.input,
         ai: h.deliberation?.final_synthesis?.response_text,
@@ -252,12 +255,37 @@ const App: React.FC = () => {
                 setReportLoading(true);
                 setShowReport(true);
                 setReportData(null);
+                setErrorStatus('IDLE');
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 60000);
+
                 try {
-                  const insight = await generateInsight(history);
+                  const insightPromise = generateInsight(history);
+                  const timeoutPromise = new Promise((_, reject) => {
+                    controller.signal.addEventListener('abort', () => reject(new Error('TIMEOUT')));
+                  });
+
+                  const insight = await Promise.race([insightPromise, timeoutPromise]) as InsightReport | null;
+                  
+                  if (!insight) {
+                    throw new Error('EMPTY_RESPONSE');
+                  }
+                  
                   setReportData(insight);
                 } catch (err: any) {
-                  if (err.message === 'QUOTA_EXHAUSTED') { setErrorStatus('QUOTA_EXHAUSTED'); setShowReport(false); }
-                } finally { setReportLoading(false); }
+                  setShowReport(false);
+                  if (err.message === 'QUOTA_EXHAUSTED') {
+                    setErrorStatus('QUOTA_EXHAUSTED');
+                  } else if (err.message === 'TIMEOUT') {
+                    setErrorStatus('GENERIC_ERROR');
+                  } else {
+                    setErrorStatus('GENERIC_ERROR');
+                  }
+                } finally {
+                  clearTimeout(timeoutId);
+                  setReportLoading(false);
+                }
             }}
             disabled={history.length === 0 || reportLoading}
             className="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 font-bold text-xs flex items-center justify-center gap-3 transition-all active:scale-95"
@@ -273,6 +301,12 @@ const App: React.FC = () => {
           <div className="absolute top-0 left-0 w-full bg-red-600/90 text-white text-[10px] font-bold py-2 px-10 flex items-center justify-between z-[60]">
             <div className="flex items-center gap-2"><AlertTriangle className="w-3.5 h-3.5" /> <span>{t.quotaExhausted}</span></div>
             <button onClick={handleOpenKeySelector} className="px-3 py-1 bg-white text-red-600 rounded-full">{t.switchKey}</button>
+          </div>
+        )}
+        {errorStatus === 'GENERIC_ERROR' && (
+          <div className="absolute top-0 left-0 w-full bg-orange-600/90 text-white text-[10px] font-bold py-2 px-10 flex items-center justify-between z-[60]">
+            <div className="flex items-center gap-2"><AlertTriangle className="w-3.5 h-3.5" /> <span>{t.genericError}</span></div>
+            <button onClick={() => setErrorStatus('IDLE')} className="px-3 py-1 bg-white text-orange-600 rounded-full">DISMISS</button>
           </div>
         )}
 
@@ -395,7 +429,10 @@ const App: React.FC = () => {
 
               <div className="flex-1 overflow-y-auto p-10 space-y-12 custom-scrollbar">
                  {reportLoading ? (
-                   <div className="h-64 flex flex-col items-center justify-center opacity-60"><Cpu className="w-12 h-12 animate-spin text-indigo-500" /></div>
+                   <div className="h-64 flex flex-col items-center justify-center opacity-60 text-center gap-4">
+                      <Cpu className="w-12 h-12 animate-spin text-indigo-500" />
+                      <p className="text-slate-400 font-serif italic animate-pulse">{t.analyzingText}</p>
+                   </div>
                  ) : reportData ? (
                    <>
                       <section className="bg-indigo-600/10 p-10 rounded-[2rem] border border-indigo-500/20">

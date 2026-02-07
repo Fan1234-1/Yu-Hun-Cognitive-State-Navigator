@@ -14,19 +14,16 @@ interface CouncilRowProps {
 
 const CouncilRow: React.FC<CouncilRowProps> = ({ role, roleZh, data, icon: Icon, colorClass, bgClass }) => {
   if (!data) return null;
-
-  // Extract color from colorClass (e.g., "border-amber-500/30" -> "amber")
-  const colorMatch = colorClass.match(/border-(\w+)-\d+/);
-  const baseColor = colorMatch ? colorMatch[1] : 'slate';
-  const textColor = `text-${baseColor}-400`;
-  const iconColor = `text-${baseColor}-500`;
+  
+  const textColor = colorClass.replace('border', 'text').replace('200', '700');
+  const iconColor = colorClass.replace('border', 'text').replace('200', '400');
 
   return (
     <div className={`w-full p-4 rounded-xl border-l-4 border ${colorClass} ${bgClass} transition-all hover:translate-x-1 duration-300 mb-3`}>
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex sm:flex-col items-center sm:items-start gap-1 sm:w-32 shrink-0 border-b sm:border-b-0 sm:border-r border-slate-200/50 pb-2 sm:pb-0 sm:pr-4">
           <div className={`p-2 rounded-lg bg-white/20 shadow-sm ${iconColor}`}>
-            <Icon className="w-5 h-5" />
+             <Icon className="w-5 h-5" />
           </div>
           <div className="flex flex-col">
             <span className={`text-[10px] font-bold uppercase tracking-widest ${textColor}`}>{role}</span>
@@ -38,7 +35,7 @@ const CouncilRow: React.FC<CouncilRowProps> = ({ role, roleZh, data, icon: Icon,
           <p className="text-sm font-medium text-slate-100 leading-relaxed font-serif">
             {data.stance || "Analyzing... / 審議中..."}
           </p>
-
+          
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {data.conflict_point && (
               <div className="flex items-start gap-2 bg-black/10 p-2 rounded-lg border border-white/5">
