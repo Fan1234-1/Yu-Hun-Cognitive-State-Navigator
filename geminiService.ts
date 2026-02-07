@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { SoulStateNode, InsightReport } from "./types";
 
@@ -32,7 +31,7 @@ export async function deliberate(inputText: string, history: any[]) {
         {
           role: "user",
           parts: [{ text: `
-History Context: ${JSON.stringify(history)}
+History Context: ${JSON.stringify(history.slice(-10))}
 Current Input: ${inputText}
 
 Deliberate and output JSON:

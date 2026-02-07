@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Activity, ArrowRight, Shield, 
@@ -159,7 +158,7 @@ const App: React.FC = () => {
     setErrorStatus('IDLE');
 
     try {
-      const historyContext = history.slice(-5).map(h => ({
+      const historyContext = history.slice(-10).map(h => ({
         user: h.input,
         ai: h.deliberation?.final_synthesis?.response_text,
         p: h.deliberation?.soul_persistence,
@@ -300,13 +299,16 @@ const App: React.FC = () => {
         {errorStatus === 'QUOTA_EXHAUSTED' && (
           <div className="absolute top-0 left-0 w-full bg-red-600/90 text-white text-[10px] font-bold py-2 px-10 flex items-center justify-between z-[60]">
             <div className="flex items-center gap-2"><AlertTriangle className="w-3.5 h-3.5" /> <span>{t.quotaExhausted}</span></div>
-            <button onClick={handleOpenKeySelector} className="px-3 py-1 bg-white text-red-600 rounded-full">{t.switchKey}</button>
+            <button onClick={handleOpenKeySelector} className="px-3 py-1 bg-white text-red-600 rounded-full font-black uppercase tracking-tighter">{t.switchKey}</button>
           </div>
         )}
         {errorStatus === 'GENERIC_ERROR' && (
           <div className="absolute top-0 left-0 w-full bg-orange-600/90 text-white text-[10px] font-bold py-2 px-10 flex items-center justify-between z-[60]">
             <div className="flex items-center gap-2"><AlertTriangle className="w-3.5 h-3.5" /> <span>{t.genericError}</span></div>
-            <button onClick={() => setErrorStatus('IDLE')} className="px-3 py-1 bg-white text-orange-600 rounded-full">DISMISS</button>
+            <div className="flex gap-2">
+              <button onClick={() => setErrorStatus('IDLE')} className="px-3 py-1 bg-white text-orange-600 rounded-full font-black uppercase tracking-tighter">RETRY</button>
+              <button onClick={() => setErrorStatus('IDLE')} className="px-3 py-1 bg-white/20 text-white rounded-full font-black uppercase tracking-tighter">DISMISS</button>
+            </div>
           </div>
         )}
 
